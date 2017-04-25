@@ -251,11 +251,11 @@ object Main{
       (fileToExecute, codeToExecute) match {
         case (None, None) => println("Loading..."); main(true).run()
         case (Some(path), None) => {
-          val (additionalPassThroughArgs, kwargs) = if (shouldParseScriptArguments) {
-            parseScriptArguments(argumentsToParse)
-          }
-          else (Seq.empty[String], Vector.empty[(String, String)])
-          main(false).runScript(path, passThroughArgs ++ additionalPassThroughArgs, kwargs, replApi) match {
+          val (additionalPassThroughArgs, kwargs) =
+            if (shouldParseScriptArguments) parseScriptArguments(argumentsToParse)
+            else (Seq.empty[String], Vector.empty[(String, String)])
+          val allPassThroughArgs = passThroughArgs ++ additionalPassThroughArgs
+          main(false).runScript(path, allPassThroughArgs, kwargs, replApi) match {
             case Res.Failure(exOpt, msg) =>
               Console.err.println(msg)
               System.exit(1)
@@ -283,8 +283,8 @@ object Main{
     * Parse arguments into flags ("passThroughArgs") and keyword args
     * e.g. input: "-d -f --name john" will parse into (Seq("d", "f"), Seq("name", "john"))
     */
-  def parseScriptArguments(argumentsToParse: Seq[String]): (Seq[String], Vector[(String, String)]) = {
-    var keywordTokens = argumentsToParse
+  def parseScriptArguments(args: Seq[String]): (Seq[String], Vector[(String, String)]) = {
+    var keywordTokens = args
     var kwargs = Vector.empty[(String, String)]
     var passThroughArgs = Seq.empty[String]
 
